@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suparna's Birthday</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to right, pink, silver);
+        }
+        .container {
+            margin-top: 100px;
+        }
+        .hidden {
+            display: none;
+        }
+        img {
+            max-width: 200px;
+            display: block;
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="start-screen">
+        <h1>Welcome to Suparna's Birthday Wishes</h1>
+        <button onclick="showSuparnaLogin()">I'm Suparna</button>
+        <button onclick="showFriendForm()">I'm a Friend</button>
+    </div>
+
+    <div class="container hidden" id="suparna-login">
+        <h2>Enter Password</h2>
+        <input type="password" id="password" placeholder="Enter password">
+        <button onclick="checkPassword()">Submit</button>
+        <p id="error-message" style="color: red;"></p>
+    </div>
+
+    <div class="container hidden" id="suparna-message">
+        <h2>I love you so much Suparna. I will always love you. You are literally my heart.</h2>
+        <button onclick="showWishes()">See Wishes</button>
+    </div>
+
+    <div class="container hidden" id="friend-form">
+        <h2>Send Your Wish</h2>
+        <input type="text" id="name" placeholder="Your Name" required><br>
+        <textarea id="wish" placeholder="Your Wish" required></textarea><br>
+        <button onclick="submitWish()">Submit</button>
+    </div>
+
+    <div class="container hidden" id="thank-you">
+        <h2>Thank you for your wish!</h2>
+    </div>
+
+    <div class="container hidden" id="wishes">
+        <h2>Wishes for Suparna</h2>
+        <div id="wishes-list"></div>
+    </div>
+
+    <script>
+        const scriptURL = "https://script.google.com/macros/s/AKfycbwSvqbA6WD7t9TYpDSCRDOumkqmavgV6m0kM3t1URlP5e7KDZOfhVbegheL7d87XqIU/exec";
+
+        function showSuparnaLogin() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('suparna-login').classList.remove('hidden');
+        }
+
+        function checkPassword() {
+            let password = document.getElementById('password').value;
+            if (password === 'penguine') {
+                document.getElementById('suparna-login').classList.add('hidden');
+                document.getElementById('suparna-message').classList.remove('hidden');
+            } else {
+                document.getElementById('error-message').textContent = 'Nice try diddy';
+            }
+        }
+
+        function showFriendForm() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('friend-form').classList.remove('hidden');
+        }
+
+        function submitWish() {
+            let name = document.getElementById('name').value;
+            let wish = document.getElementById('wish').value;
+            
+            if (!name || !wish) {
+                alert('Name and Wish are required!');
+                return;
+            }
+            
+            let formData = new FormData();
+            formData.append('name', name);
+            formData.append('wish', wish);
+            
+            fetch(scriptURL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(result => {
+                document.getElementById('friend-form').classList.add('hidden');
+                document.getElementById('thank-you').classList.remove('hidden');
+            })
+            .catch(error => console.error('Error!', error.message));
+        }
+
+        function showWishes() {
+            document.getElementById('suparna-message').classList.add('hidden');
+            document.getElementById('wishes').classList.remove('hidden');
+            displayWishes();
+        }
+
+        function displayWishes() {
+            let wishesList = document.getElementById('wishes-list');
+            wishesList.innerHTML = '';
+
+            fetch(scriptURL)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        wishesList.innerHTML = "<p>No wishes yet. Be the first!</p>";
+                    } else {
+                        data.forEach(wishData => {
+                            let wishContainer = document.createElement('div');
+                            wishContainer.innerHTML = `<p><strong>${wishData.name}:</strong> ${wishData.wish}</p>`;
+                            wishesList.appendChild(wishContainer);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error!', error.message));
+        }
+    </script>
+</body>
+</html>
